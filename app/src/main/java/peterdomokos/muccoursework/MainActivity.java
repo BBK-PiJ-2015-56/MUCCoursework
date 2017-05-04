@@ -12,7 +12,12 @@ import com.indooratlas.android.sdk.IALocationListener;
 import com.indooratlas.android.sdk.IALocationManager;
 import com.indooratlas.android.sdk.IALocationRequest;
 
+import org.w3c.dom.Text;
+
 public class MainActivity extends AppCompatActivity {
+
+    TextView mLongLabel;
+    TextView mLatLabel;
     // give runtime code permissions an arbitrary value
     private final int CODE_PERMISSIONS = 1;
     //declare the manager
@@ -38,6 +43,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mLongLabel = (TextView) findViewById(R.id.long_label);
+        mLatLabel = (TextView) findViewById(R.id.lat_label);
+
         //instantiate location manager, passing in current context
         mIALocationManager = IALocationManager.create(this);
 
@@ -63,6 +71,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy(){
         mIALocationManager.destroy();
         super.onDestroy();
+    }
+
+    //handle any denial of permissions
+    //@Override ?????????????????
+    public void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults){
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        //...must implement handling denial with a toast
     }
 }
 
