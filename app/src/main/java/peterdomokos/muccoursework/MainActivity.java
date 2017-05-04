@@ -14,12 +14,32 @@ import com.indooratlas.android.sdk.IALocationManager;
 public class MainActivity extends AppCompatActivity {
     // give runtime code permissions an arbitrary value
     private final int CODE_PERMISSIONS = 1;
+    //declare the manager
+    IALocationManager mIALocationManager;
 
+    //declare and instantiate the listener
+    IALocationListener mIALocationListener = new IALocationListener(){
+        @Override
+        public void onLocationChanged(IALocation iaLocation){
+            //update textview with the new location
+            TextView mLongtitude = (TextView) findViewById(R.id.longtitude);
+            TextView mLatitude = (TextView) findViewById(R.id.latitude);
+            mLongtitude.setText(String.valueOf(iaLocation.getLongitude()));
+            mLatitude.setText(String.valueOf(iaLocation.getLatitude()));
+        }
+        @Override
+        public void onStatusChanged(String str, int i, Bundle bundle){
+            //...
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        //instantiate location manager, passing in current context
+        mIALocationManager = IALocationManager.create(this);
+        
         //ask for permissions at run time
         String[] neededPermissions = {
                 Manifest.permission.CHANGE_WIFI_STATE,
