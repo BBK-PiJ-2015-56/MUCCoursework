@@ -16,8 +16,6 @@ import org.w3c.dom.Text;
 
 public class MainActivity extends AppCompatActivity {
 
-    TextView mLongLabel;
-    TextView mLatLabel;
     // give runtime code permissions an arbitrary value
     private final int CODE_PERMISSIONS = 1;
     //declare the manager
@@ -28,8 +26,8 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onLocationChanged(IALocation iaLocation){
             //update textview with the new location
-            TextView mLongtitude = (TextView) findViewById(R.id.longtitude);
-            TextView mLatitude = (TextView) findViewById(R.id.latitude);
+            TextView mLongtitude = (TextView) findViewById(R.id.long_value);
+            TextView mLatitude = (TextView) findViewById(R.id.lat_value);
             mLongtitude.setText(String.valueOf(iaLocation.getLongitude()));
             mLatitude.setText(String.valueOf(iaLocation.getLatitude()));
         }
@@ -43,8 +41,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mLongLabel = (TextView) findViewById(R.id.long_label);
-        mLatLabel = (TextView) findViewById(R.id.lat_label);
 
         //instantiate location manager, passing in current context
         mIALocationManager = IALocationManager.create(this);

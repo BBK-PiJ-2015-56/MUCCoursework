@@ -18,13 +18,12 @@
         android:orientation="horizontal" >
 
         <TextView
-            android:id="@+id/long_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="longtitude"/>
 
         <TextView
-            android:id="@+id/longtitude"
+            android:id="@+id/long_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             tools:text="long value"/>
@@ -36,13 +35,12 @@
         android:orientation="horizontal" >
 
         <TextView
-            android:id="@+id/lat_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:text="latitude"/>
+            android:text="latitude"/>
 
         <TextView
-             android:id="@+id/latitude"
+            android:id="@+id/lat_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             tools:text="lat value" />
