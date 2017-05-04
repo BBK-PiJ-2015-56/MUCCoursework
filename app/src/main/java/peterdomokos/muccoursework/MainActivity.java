@@ -10,6 +10,7 @@ import android.widget.TextView;
 import com.indooratlas.android.sdk.IALocation;
 import com.indooratlas.android.sdk.IALocationListener;
 import com.indooratlas.android.sdk.IALocationManager;
+import com.indooratlas.android.sdk.IALocationRequest;
 
 public class MainActivity extends AppCompatActivity {
     // give runtime code permissions an arbitrary value
@@ -39,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         //instantiate location manager, passing in current context
         mIALocationManager = IALocationManager.create(this);
-        
+
         //ask for permissions at run time
         String[] neededPermissions = {
                 Manifest.permission.CHANGE_WIFI_STATE,
@@ -48,7 +49,20 @@ public class MainActivity extends AppCompatActivity {
         };
         //request the permissions
         ActivityCompat.requestPermissions(this, neededPermissions, CODE_PERMISSIONS);
-
+    }
+    //pass location updates to the manager by sending a request to listener
+    protected void onResume(){
+        super.onResume();
+        mIALocationManager.requestLocationUpdates(IALocationRequest.create(), mIALocationListener);
+    }
+    //stop receiving updates when not needed
+    protected void onPause(){
+        super.onPause();
+        mIALocationManager.removeLocationUpdates(mIALocationListener);
+    }
+    protected void onDestroy(){
+        mIALocationManager.destroy();
+        super.onDestroy();
     }
 }
 
