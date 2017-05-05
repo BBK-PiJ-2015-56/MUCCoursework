@@ -54,10 +54,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view){
                 //create a child of mFirebase and add a value to test firebase works
-                Firebase mFirebaseChild = mFirebase.child("button press");
-                mFirebaseChild.setValue("send data button");
+                //Firebase mFirebaseChild = mFirebase.child("button press");
+                //mFirebaseChild.setValue("send data button");
                 //it works but only first click - use push() and then key will be a uniqueID
-                
+                mFirebase.push().setValue("button pressed");
+                //this works but key name is not in our control
+                //may be better to wire up a timestamp and that can be the key and the value will be the long and lat as an array
             }
         });
         Firebase.setAndroidContext(this);
