@@ -5,8 +5,12 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
+
+import com.firebase.client.Firebase;
 import com.indooratlas.android.sdk.IALocation;
 import com.indooratlas.android.sdk.IALocationListener;
 import com.indooratlas.android.sdk.IALocationManager;
@@ -15,6 +19,9 @@ import com.indooratlas.android.sdk.IALocationRequest;
 import org.w3c.dom.Text;
 
 public class MainActivity extends AppCompatActivity {
+
+    Firebase mFirebase;
+    Button mButton;
 
     // give runtime code permissions an arbitrary value
     private final int CODE_PERMISSIONS = 1;
@@ -41,6 +48,20 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        //wire up our test button for firebase
+        /*mButton = (Button) findViewById(R.id.send_data);
+        mButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                //need to implement the test button for sending data to firebase database, or do it with GeoQuiz
+                //create a child of mFirebase and add a value
+                Firebase mFirebaseChild = mFirebase.child("button press");
+                mFirebaseChild.setValue("send data button");
+            }
+        });
+        Firebase.setAndroidContext(this);
+        mFirebase = new Firebase("https://muccoursework-a1c7e.firebaseio.com/");
+        */
 
         //instantiate location manager, passing in current context
         mIALocationManager = IALocationManager.create(this);
@@ -75,6 +96,8 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         //...must implement handling denial with a toast
     }
+
+    //geofence notifications using firebase!!!!!!
 }
 
 

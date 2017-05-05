@@ -45,5 +45,10 @@
             android:layout_height="wrap_content"
             tools:text="lat value" />
     </LinearLayout>
+    <Button
+        android:id="@+id/send_data"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="send data to firebase"/>
 
 </LinearLayout>

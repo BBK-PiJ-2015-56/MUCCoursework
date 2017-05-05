@@ -20,16 +20,19 @@ android {
 }
 
 dependencies {
-    compile 'com.indooratlas.android:indooratlas-android-sdk:2.4.1@aar'
     compile fileTree(dir: 'libs', include: ['*.jar'])
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:25.1.1'
-    compile 'com.android.support:design:25.1.1'
+    compile 'com.indooratlas.android:indooratlas-android-sdk:2.4.1@aar'
+    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.android.support:design:25.3.1'
+    compile 'com.firebase:firebase-client-android:2.5.0'
+    compile 'com.google.firebase:firebase-core:10.2.4'
+    compile 'com.google.firebase:firebase-database:10.2.4'
     testCompile 'junit:junit:4.12'
 }
-repositories{
+repositories {
     maven {
         url "http://indooratlas-ltd.bintray.com/mvn-public"
     }
