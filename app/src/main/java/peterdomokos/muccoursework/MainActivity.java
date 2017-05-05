@@ -12,10 +12,6 @@ import android.widget.TextView;
 
 
 import com.firebase.client.Firebase;
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.appindexing.Thing;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.indooratlas.android.sdk.IALocation;
 import com.indooratlas.android.sdk.IALocationListener;
 import com.indooratlas.android.sdk.IALocationManager;
@@ -39,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     TextView mLong;
     TextView mLat;
     String mTime;
+    Timer t;
 
     // give runtime code permissions an arbitrary value
     private final int CODE_PERMISSIONS = 1;
@@ -67,12 +64,7 @@ public class MainActivity extends AppCompatActivity {
             //...
         }
     };
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
-    private GoogleApiClient mClient;
-
+    
     //refactor later to pass in location
     private void updateDisplay() {
         mLong.setText(mCurrentLoc.get(0));
@@ -125,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
         //request the permissions
         ActivityCompat.requestPermissions(this, neededPermissions, CODE_PERMISSIONS);
 
-        Timer t = new Timer();
+        t = new Timer();
         t.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -134,6 +126,7 @@ public class MainActivity extends AppCompatActivity {
                 sendData(mTime, mCurrentLoc.toString());
             }
         }, 0, 1000);
+        //WARNING: I must cancel in onPause
 
     }
 
@@ -146,6 +139,8 @@ public class MainActivity extends AppCompatActivity {
     //stop receiving updates when not needed
     protected void onPause() {
         super.onPause();
+        //cancel the timer
+        t.cancel();
         mIALocationManager.removeLocationUpdates(mIALocationListener);
     }
 
@@ -161,42 +156,15 @@ public class MainActivity extends AppCompatActivity {
         //...must implement handling denial with a toast
     }
 
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
-    /*public Action getIndexApiAction() {
-        Thing object = new Thing.Builder()
-                .setName("Main Page") // TODO: Define a title for the content shown.
-                // TODO: Make sure this auto-generated URL is correct.
-                .setUrl(Uri.parse("http://[ENTER-YOUR-URL-HERE]"))
-                .build();
-        return new Action.Builder(Action.TYPE_VIEW)
-                .setObject(object)
-                .setActionStatus(Action.STATUS_TYPE_COMPLETED)
-                .build();
-    }*.
-
     @Override
     public void onStart() {
         super.onStart();
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        mClient.connect();
-        AppIndex.AppIndexApi.start(mClient, getIndexApiAction());
     }
 
     @Override
     public void onStop() {
         super.onStop();
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        AppIndex.AppIndexApi.end(mClient, getIndexApiAction());
-        mClient.disconnect();
     }
-
     //geofence notifications using firebase!!!!!!
 }
 
