@@ -1,6 +1,7 @@
 package peterdomokos.muccoursework;
 
 import android.Manifest;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -11,6 +12,10 @@ import android.widget.TextView;
 
 
 import com.firebase.client.Firebase;
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.appindexing.Thing;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.indooratlas.android.sdk.IALocation;
 import com.indooratlas.android.sdk.IALocationListener;
 import com.indooratlas.android.sdk.IALocationManager;
@@ -18,8 +23,13 @@ import com.indooratlas.android.sdk.IALocationRequest;
 
 import org.w3c.dom.Text;
 
+import java.security.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -28,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     List<String> mCurrentLoc = new ArrayList<>();
     TextView mLong;
     TextView mLat;
+    String mTime;
 
     // give runtime code permissions an arbitrary value
     private final int CODE_PERMISSIONS = 1;
@@ -35,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
     IALocationManager mIALocationManager;
 
     //declare and instantiate the listener
-    IALocationListener mIALocationListener = new IALocationListener(){
+    IALocationListener mIALocationListener = new IALocationListener() {
         @Override
         public void onLocationChanged(IALocation iaLocation) {
             //replace currrentLoc list items 1 and 2 ie long and lat
@@ -45,15 +56,23 @@ public class MainActivity extends AppCompatActivity {
             }
             mCurrentLoc.add(0, String.valueOf(iaLocation.getLongitude()));
             mCurrentLoc.add(1, String.valueOf(iaLocation.getLatitude()));
-        //updateDisplay - not i will later refactor to put in separate class and pass in the loc
-        updateDisplay();
-        };
+            //updateDisplay - not i will later refactor to put in separate class and pass in the loc
+            updateDisplay();
+        }
+
+        ;
 
         @Override
-        public void onStatusChanged(String str, int i, Bundle bundle){
+        public void onStatusChanged(String str, int i, Bundle bundle) {
             //...
         }
     };
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient mClient;
+
     //refactor later to pass in location
     private void updateDisplay() {
         mLong.setText(mCurrentLoc.get(0));
@@ -64,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
     //sendData("new location", locationStr);
 
     //helper method for sending data to firebase
-    private void sendData(String key, String value){
+    private void sendData(String key, String value) {
         Firebase mFirebaseChild = mFirebase.child(key);
         mFirebaseChild.setValue(mCurrentLoc.toString());
     }
@@ -78,9 +97,9 @@ public class MainActivity extends AppCompatActivity {
         mLat = (TextView) findViewById(R.id.lat_value);
         //wire up our test button for firebase
         mButton = (Button) findViewById(R.id.send_data);
-        mButton.setOnClickListener(new View.OnClickListener(){
+        mButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view){
+            public void onClick(View view) {
                 //create a child of mFirebase and add a value to test firebase works
                 //Firebase mFirebaseChild = mFirebase.child("button press");
                 //mFirebaseChild.setValue("send data button");
@@ -106,31 +125,76 @@ public class MainActivity extends AppCompatActivity {
         //request the permissions
         ActivityCompat.requestPermissions(this, neededPermissions, CODE_PERMISSIONS);
 
-        //set up timestamp and send data to firebase every sec
-        //currentTime  = new timestamp
-        // if currentTime.getTime().equals(1 second after previous)
-        // sendData
+        Timer t = new Timer();
+        t.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                //get current time and pass to sendData with current location every sec
+                mTime = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+                sendData(mTime, mCurrentLoc.toString());
+            }
+        }, 0, 1000);
+
     }
+
     //pass location updates to the manager by sending a request to listener
-    protected void onResume(){
+    protected void onResume() {
         super.onResume();
         mIALocationManager.requestLocationUpdates(IALocationRequest.create(), mIALocationListener);
     }
+
     //stop receiving updates when not needed
-    protected void onPause(){
+    protected void onPause() {
         super.onPause();
         mIALocationManager.removeLocationUpdates(mIALocationListener);
     }
-    protected void onDestroy(){
+
+    protected void onDestroy() {
         mIALocationManager.destroy();
         super.onDestroy();
     }
 
     //handle any denial of permissions
     //@Override ?????????????????
-    public void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults){
+    public void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         //...must implement handling denial with a toast
+    }
+
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    /*public Action getIndexApiAction() {
+        Thing object = new Thing.Builder()
+                .setName("Main Page") // TODO: Define a title for the content shown.
+                // TODO: Make sure this auto-generated URL is correct.
+                .setUrl(Uri.parse("http://[ENTER-YOUR-URL-HERE]"))
+                .build();
+        return new Action.Builder(Action.TYPE_VIEW)
+                .setObject(object)
+                .setActionStatus(Action.STATUS_TYPE_COMPLETED)
+                .build();
+    }*.
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        mClient.connect();
+        AppIndex.AppIndexApi.start(mClient, getIndexApiAction());
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        AppIndex.AppIndexApi.end(mClient, getIndexApiAction());
+        mClient.disconnect();
     }
 
     //geofence notifications using firebase!!!!!!
