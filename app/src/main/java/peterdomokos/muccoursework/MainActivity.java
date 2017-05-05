@@ -18,10 +18,16 @@ import com.indooratlas.android.sdk.IALocationRequest;
 
 import org.w3c.dom.Text;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity {
 
     Firebase mFirebase;
     Button mButton;
+    List<String> mCurrentLoc = new ArrayList<>();
+    TextView mLong;
+    TextView mLat;
 
     // give runtime code permissions an arbitrary value
     private final int CODE_PERMISSIONS = 1;
@@ -31,35 +37,45 @@ public class MainActivity extends AppCompatActivity {
     //declare and instantiate the listener
     IALocationListener mIALocationListener = new IALocationListener(){
         @Override
-        public void onLocationChanged(IALocation iaLocation){
-            //create a string representation of location (note we can get rid of hard coded long and lat labels)
-            String longStr = "Longtitude " + String.valueOf(iaLocation.getLongitude());
-            String latStr = "Latitude " + String.valueOf(iaLocation.getLatitude());
-            String locationStr = "(" + longStr + " , " + latStr + ")";
-            //update textview with the new location
-            TextView mLongtitude = (TextView) findViewById(R.id.long_value);
-            TextView mLatitude = (TextView) findViewById(R.id.lat_value);
-            mLongtitude.setText(longStr);
-            mLatitude.setText(latStr);
-            //send data to firebase database
-            sendData("new location", locationStr);
-        }
+        public void onLocationChanged(IALocation iaLocation) {
+            //replace currrentLoc list items 1 and 2 ie long and lat
+            if (!(mCurrentLoc.isEmpty())) {
+                //note clear is optional so i can refactor later
+                mCurrentLoc.clear();
+            }
+            mCurrentLoc.add(0, String.valueOf(iaLocation.getLongitude()));
+            mCurrentLoc.add(1, String.valueOf(iaLocation.getLatitude()));
+        //updateDisplay - not i will later refactor to put in separate class and pass in the loc
+        updateDisplay();
+        };
+
         @Override
         public void onStatusChanged(String str, int i, Bundle bundle){
             //...
         }
     };
+    //refactor later to pass in location
+    private void updateDisplay() {
+        mLong.setText(mCurrentLoc.get(0));
+        mLat.setText(mCurrentLoc.get(1));
+    }
+    //send data to firebase database every sec
+    //still need to implement a timestamp for key and then put this in onCreate and onResume????
+    //sendData("new location", locationStr);
 
     //helper method for sending data to firebase
     private void sendData(String key, String value){
         Firebase mFirebaseChild = mFirebase.child(key);
-        mFirebaseChild.setValue(value);
+        mFirebaseChild.setValue(mCurrentLoc.toString());
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        //wire up two TextViews for location coods
+        mLong = (TextView) findViewById(R.id.long_value);
+        mLat = (TextView) findViewById(R.id.lat_value);
         //wire up our test button for firebase
         mButton = (Button) findViewById(R.id.send_data);
         mButton.setOnClickListener(new View.OnClickListener(){
@@ -89,6 +105,11 @@ public class MainActivity extends AppCompatActivity {
         };
         //request the permissions
         ActivityCompat.requestPermissions(this, neededPermissions, CODE_PERMISSIONS);
+
+        //set up timestamp and send data to firebase every sec
+        //currentTime  = new timestamp
+        // if currentTime.getTime().equals(1 second after previous)
+        // sendData
     }
     //pass location updates to the manager by sending a request to listener
     protected void onResume(){
