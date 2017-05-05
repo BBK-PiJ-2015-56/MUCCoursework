@@ -32,17 +32,29 @@ public class MainActivity extends AppCompatActivity {
     IALocationListener mIALocationListener = new IALocationListener(){
         @Override
         public void onLocationChanged(IALocation iaLocation){
+            //create a string representation of location (note we can get rid of hard coded long and lat labels)
+            String longStr = "Longtitude " + String.valueOf(iaLocation.getLongitude());
+            String latStr = "Latitude " + String.valueOf(iaLocation.getLatitude());
+            String locationStr = "(" + longStr + " , " + latStr + ")";
             //update textview with the new location
             TextView mLongtitude = (TextView) findViewById(R.id.long_value);
             TextView mLatitude = (TextView) findViewById(R.id.lat_value);
-            mLongtitude.setText(String.valueOf(iaLocation.getLongitude()));
-            mLatitude.setText(String.valueOf(iaLocation.getLatitude()));
+            mLongtitude.setText(longStr);
+            mLatitude.setText(latStr);
+            //send data to firebase database
+            sendData("new location", locationStr);
         }
         @Override
         public void onStatusChanged(String str, int i, Bundle bundle){
             //...
         }
     };
+
+    //helper method for sending data to firebase
+    private void sendData(String key, String value){
+        Firebase mFirebaseChild = mFirebase.child(key);
+        mFirebaseChild.setValue(value);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
                 mFirebase.push().setValue("button pressed");
                 //this works but key name is not in our control
                 //may be better to wire up a timestamp and that can be the key and the value will be the long and lat as an array
+                //for testing, I will retrieve data too
             }
         });
         Firebase.setAndroidContext(this);
