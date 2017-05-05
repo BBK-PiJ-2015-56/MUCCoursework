@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
             //...
         }
     };
-    
+
     //refactor later to pass in location
     private void updateDisplay() {
         mLong.setText(mCurrentLoc.get(0));
@@ -76,8 +76,12 @@ public class MainActivity extends AppCompatActivity {
 
     //helper method for sending data to firebase
     private void sendData(String key, String value) {
-        Firebase mFirebaseChild = mFirebase.child(key);
+        //put key into correct format for firebase
+        String formattedKey = key.replace('.', ':');
+        Firebase mFirebaseChild = mFirebase.child(formattedKey);
+        Log.i("info", "firebase child created!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         mFirebaseChild.setValue(mCurrentLoc.toString());
+        Log.i("info", "value of child set!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     }
 
     @Override
@@ -116,16 +120,23 @@ public class MainActivity extends AppCompatActivity {
         };
         //request the permissions
         ActivityCompat.requestPermissions(this, neededPermissions, CODE_PERMISSIONS);
-
+        //set timer for sending data to firebase
+        //also put in test values
+        mCurrentLoc.add(0,"long test");
+        mCurrentLoc.add(1, "lat test");
         t = new Timer();
         t.schedule(new TimerTask() {
             @Override
             public void run() {
+                Log.i("info", "Timer task running!!!!!!");
                 //get current time and pass to sendData with current location every sec
                 mTime = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+                Log.i("info", "mTime declared as..." + mTime);
+                Log.i("info", "mCurrentLoc is " + mCurrentLoc.toString());
                 sendData(mTime, mCurrentLoc.toString());
+                Log.i("info", "data sent to firebase");
             }
-        }, 0, 1000);
+        }, 5000, 1000);
         //WARNING: I must cancel in onPause
 
     }
@@ -138,10 +149,13 @@ public class MainActivity extends AppCompatActivity {
 
     //stop receiving updates when not needed
     protected void onPause() {
+        Log.i("info", "onPause called");
         super.onPause();
         //cancel the timer
         t.cancel();
+        Log.i("info", "timer cancelled !!!!!!!!!!!!!!!!!!!!!");
         mIALocationManager.removeLocationUpdates(mIALocationListener);
+        Log.i("info", "remove loc updates executed!!!!!!!!!!!!!!!!!");
     }
 
     protected void onDestroy() {
