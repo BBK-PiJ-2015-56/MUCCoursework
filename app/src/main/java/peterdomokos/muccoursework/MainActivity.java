@@ -49,19 +49,19 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         //wire up our test button for firebase
-        /*mButton = (Button) findViewById(R.id.send_data);
+        mButton = (Button) findViewById(R.id.send_data);
         mButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
-                //need to implement the test button for sending data to firebase database, or do it with GeoQuiz
-                //create a child of mFirebase and add a value
+                //create a child of mFirebase and add a value to test firebase works
                 Firebase mFirebaseChild = mFirebase.child("button press");
                 mFirebaseChild.setValue("send data button");
+                //it works but only first click - use push() and then key will be a uniqueID
+                
             }
         });
         Firebase.setAndroidContext(this);
         mFirebase = new Firebase("https://muccoursework-a1c7e.firebaseio.com/");
-        */
 
         //instantiate location manager, passing in current context
         mIALocationManager = IALocationManager.create(this);
