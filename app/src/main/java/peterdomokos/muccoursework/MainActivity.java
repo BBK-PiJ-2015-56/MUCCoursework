@@ -2,6 +2,7 @@ package peterdomokos.muccoursework;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -32,11 +33,14 @@ public class MainActivity extends AppCompatActivity {
 
     Firebase mFirebase;
     Button mButton;
-    List<String> mCurrentLoc = new ArrayList<>();
+    IALocation mCurrentLoc;
+    String mcurrentLongStr ="no value yet";
+    String mcurrentLatStr = "no value yet";
     TextView mLong;
     TextView mLat;
     String mTime;
     Timer t;
+    Location mLocOfInterest;
 
     // give runtime code permissions an arbitrary value
     private final int PERMISSIONS_REQUEST_CODE = 1;
@@ -48,14 +52,11 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onLocationChanged(IALocation iaLocation) {
             Log.i("info", "LOCATION HAS CHANGED!!!!!!!!!!!!!!!!!!!!!!!!!");
-            //replace currrentLoc list items 1 and 2 ie long and lat
-            if (!(mCurrentLoc.isEmpty())) {
-                //note clear is optional so i can refactor later
-                mCurrentLoc.clear();
-            }
-            mCurrentLoc.add(0, String.valueOf(iaLocation.getLongitude()));
-            mCurrentLoc.add(1, String.valueOf(iaLocation.getLatitude()));
-            //updateDisplay - not i will later refactor to put in separate class and pass in the loc
+            mCurrentLoc = iaLocation;
+            mcurrentLongStr = String.valueOf(mCurrentLoc.getLongitude());
+            mcurrentLatStr = String.valueOf(mCurrentLoc.getLatitude());
+
+            Log.i("info", "CURRENT LOCATION CHANGED TO " + mCurrentLoc.toString());
             updateDisplay();
         }
 
@@ -67,20 +68,23 @@ public class MainActivity extends AppCompatActivity {
 
     //refactor later to pass in location
     private void updateDisplay() {
-        mLong.setText(mCurrentLoc.get(0));
-        mLat.setText(mCurrentLoc.get(1));
+        mLong.setText(mcurrentLongStr);
+        mLat.setText(mcurrentLatStr);
+        // toast if within fence
+        if(mCurrentLoc.toLocation().distanceTo(mLocOfInterest) < 3.0)
+            Log.i("info", "WITHIN RANGE!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        //// TODO: 06/05/2017 toast to user that they are within range 
     }
-    //send data to firebase database every sec
-    //still need to implement a timestamp for key and then put this in onCreate and onResume????
-    //sendData("new location", locationStr);
 
     //helper method for sending data to firebase
-    private void sendData(String key, String value) {
+    private void sendData() {
+        //// TODO: 06/05/2017 check what i need to send - ie floor level?? 
+        mTime = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+        Log.i("info", "mTime declared as..." + mTime );
         //put key into correct format for firebase
-        String formattedKey = key.replace('.', ':');
-        Firebase mFirebaseChild = mFirebase.child(formattedKey);
-        Log.i("info", "firebase child created!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-        mFirebaseChild.setValue(mCurrentLoc.toString());
+        String formattedTime = mTime.replace('.', ':');
+        Firebase mFirebaseChild = mFirebase.child(formattedTime);
+        mFirebaseChild.setValue("[" +mcurrentLongStr +" , " +mcurrentLatStr +"]");
         Log.i("info", "value of child set!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     }
 
@@ -113,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
         mIALocationManager = IALocationManager.create(this);
 
         //ask for permissions at run time
+        //// TODO: 06/05/2017 check i really need any of the permissions i added later 
         String[] neededPermissions = {
                 Manifest.permission.CHANGE_WIFI_STATE,
                 Manifest.permission.ACCESS_WIFI_STATE,
@@ -129,6 +134,11 @@ public class MainActivity extends AppCompatActivity {
 
         //request the permissions
         ActivityCompat.requestPermissions(this, neededPermissions, PERMISSIONS_REQUEST_CODE);
+
+        //set location of interest - wire up to UI later!!!!!!
+        mLocOfInterest = new Location("aProvider");
+        mLocOfInterest.setLongitude(-0.1299845104014142);
+        mLocOfInterest.setLatitude(51.52166396722949);
     }
 
     //deal with permissions result
@@ -147,20 +157,14 @@ public class MainActivity extends AppCompatActivity {
     //pass location updates to the manager by sending a request to listener
     protected void onResume() {
         super.onResume();
-        //set timer for sending data to firebase
-        //also put in test values
-        mCurrentLoc.add(0,"long test");
-        mCurrentLoc.add(1, "lat test");
+        //set timer for sending data to firebase - this way it will send to database every second regardless
+        //of whether or not the location changes
         t = new Timer();
         t.schedule(new TimerTask() {
             @Override
             public void run() {
-                Log.i("info", "Timer task running!!!!!!");
-                //get current time and pass to sendData with current location every sec
-                mTime = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
-                Log.i("info", "mTime declared as..." + mTime);
-                Log.i("info", "mCurrentLoc is " + mCurrentLoc.toString());
-                sendData(mTime, mCurrentLoc.toString());
+                Log.i("info", "Timer task running!!!!!!.calling sendData method ");
+                sendData();
                 Log.i("info", "data sent to firebase");
             }
         }, 5000, 1000);
@@ -185,13 +189,6 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    //handle any denial of permissions
-    //@Override ?????????????????
-    public void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        //...must implement handling denial with a toast
-    }
-
     @Override
     public void onStart() {
         super.onStart();
@@ -201,7 +198,10 @@ public class MainActivity extends AppCompatActivity {
     public void onStop() {
         super.onStop();
     }
-    //geofence notifications using firebase!!!!!!
+
+
 }
+
+
 
 
