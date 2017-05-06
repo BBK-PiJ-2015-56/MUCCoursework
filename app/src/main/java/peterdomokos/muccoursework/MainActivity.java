@@ -1,6 +1,7 @@
 package peterdomokos.muccoursework;
 
 import android.Manifest;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -38,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     Timer t;
 
     // give runtime code permissions an arbitrary value
-    private final int CODE_PERMISSIONS = 1;
+    private final int PERMISSIONS_REQUEST_CODE = 1;
     //declare the manager
     IALocationManager mIALocationManager;
 
@@ -46,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
     IALocationListener mIALocationListener = new IALocationListener() {
         @Override
         public void onLocationChanged(IALocation iaLocation) {
+            Log.i("info", "LOCATION HAS CHANGED!!!!!!!!!!!!!!!!!!!!!!!!!");
             //replace currrentLoc list items 1 and 2 ie long and lat
             if (!(mCurrentLoc.isEmpty())) {
                 //note clear is optional so i can refactor later
@@ -56,8 +58,6 @@ public class MainActivity extends AppCompatActivity {
             //updateDisplay - not i will later refactor to put in separate class and pass in the loc
             updateDisplay();
         }
-
-        ;
 
         @Override
         public void onStatusChanged(String str, int i, Bundle bundle) {
@@ -116,35 +116,41 @@ public class MainActivity extends AppCompatActivity {
         String[] neededPermissions = {
                 Manifest.permission.CHANGE_WIFI_STATE,
                 Manifest.permission.ACCESS_WIFI_STATE,
-                Manifest.permission.ACCESS_COARSE_LOCATION
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE ,
+                Manifest.permission.BLUETOOTH,
+                Manifest.permission.BLUETOOTH_ADMIN,
+                Manifest.permission.INTERNET,
+                Manifest.permission.ACCESS_NETWORK_STATE,
+                Manifest.permission.ACCESS_LOCATION_EXTRA_COMMANDS
+                //INSTALL LOCATION PROVIDED NOT INCLUDED - MUST BE SYSTEM APP
         };
-        //request the permissions
-        ActivityCompat.requestPermissions(this, neededPermissions, CODE_PERMISSIONS);
-        //set timer for sending data to firebase
-        //also put in test values
-        mCurrentLoc.add(0,"long test");
-        mCurrentLoc.add(1, "lat test");
-        t = new Timer();
-        t.schedule(new TimerTask() {
-        @Override
-        public void run() {
-            Log.i("info", "Timer task running!!!!!!");
-            //get current time and pass to sendData with current location every sec
-            mTime = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
-            Log.i("info", "mTime declared as..." + mTime);
-            Log.i("info", "mCurrentLoc is " + mCurrentLoc.toString());
-            sendData(mTime, mCurrentLoc.toString());
-            Log.i("info", "data sent to firebase");
-        }
-    }, 5000, 1000);
-    //WARNING: I must cancel in onPause
 
+        //request the permissions
+        ActivityCompat.requestPermissions(this, neededPermissions, PERMISSIONS_REQUEST_CODE);
+    }
+
+    //deal with permissions result
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults){
+        for (int i = 0; i < grantResults.length; i++){
+            if(grantResults[i] == PackageManager.PERMISSION_GRANTED){
+                Log.i("info", "permission granted for: " + permissions[i]);
+            }else{
+                Log.i("info", "permission denied for: " + permissions[i]);
+            }
+
+        }
     }
 
     //pass location updates to the manager by sending a request to listener
     protected void onResume() {
         super.onResume();
-        //timer for data sending
+        //set timer for sending data to firebase
+        //also put in test values
+        mCurrentLoc.add(0,"long test");
+        mCurrentLoc.add(1, "lat test");
         t = new Timer();
         t.schedule(new TimerTask() {
             @Override
