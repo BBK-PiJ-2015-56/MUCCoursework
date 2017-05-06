@@ -126,6 +126,27 @@ public class MainActivity extends AppCompatActivity {
         mCurrentLoc.add(1, "lat test");
         t = new Timer();
         t.schedule(new TimerTask() {
+        @Override
+        public void run() {
+            Log.i("info", "Timer task running!!!!!!");
+            //get current time and pass to sendData with current location every sec
+            mTime = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+            Log.i("info", "mTime declared as..." + mTime);
+            Log.i("info", "mCurrentLoc is " + mCurrentLoc.toString());
+            sendData(mTime, mCurrentLoc.toString());
+            Log.i("info", "data sent to firebase");
+        }
+    }, 5000, 1000);
+    //WARNING: I must cancel in onPause
+
+    }
+
+    //pass location updates to the manager by sending a request to listener
+    protected void onResume() {
+        super.onResume();
+        //timer for data sending
+        t = new Timer();
+        t.schedule(new TimerTask() {
             @Override
             public void run() {
                 Log.i("info", "Timer task running!!!!!!");
@@ -138,13 +159,8 @@ public class MainActivity extends AppCompatActivity {
             }
         }, 5000, 1000);
         //WARNING: I must cancel in onPause
-
-    }
-
-    //pass location updates to the manager by sending a request to listener
-    protected void onResume() {
-        super.onResume();
         mIALocationManager.requestLocationUpdates(IALocationRequest.create(), mIALocationListener);
+
     }
 
     //stop receiving updates when not needed
