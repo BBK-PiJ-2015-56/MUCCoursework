@@ -27,20 +27,13 @@ import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
 
-    Firebase mFirebase;
-    Button mButton;
-    IALocation mCurrentLoc;
-    String mcurrentLongStr ="no value yet";
-    String mcurrentLatStr = "no value yet";
-    String mCurrentFloorStr = "no value yet";
-    TextView mLong;
-    TextView mLat;
-    String mTime ="";
-    Timer t;
-    Location mLocOfInterest;
-    int withinRangeToastID = 0;
-    String permissionRequestToast = "";
-    String finalPermissionToast = "";
+    private Firebase mFirebase;
+    private IALocation mCurrentLoc;
+
+    private TextView mLong;
+    private TextView mLat;
+    private Timer mTimer;
+    private Location mLocOfInterest;
 
     // give runtime code permissions an arbitrary value
     private final int PERMISSIONS_REQUEST_CODE = 1;
@@ -52,11 +45,6 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onLocationChanged(IALocation iaLocation) {
             mCurrentLoc = iaLocation;
-            mcurrentLongStr = String.valueOf(mCurrentLoc.getLongitude());
-            mcurrentLatStr = String.valueOf(mCurrentLoc.getLatitude());
-            mCurrentFloorStr = String.valueOf(mCurrentLoc.getFloorLevel());
-
-            Log.i("info", "CURRENT LOCATION CHANGED TO " + mCurrentLoc.toString());
             updateDisplay();
         }
 
@@ -68,25 +56,36 @@ public class MainActivity extends AppCompatActivity {
 
     //refactor later to pass in location
     private void updateDisplay() {
-        mLong.setText(mcurrentLongStr);
-        mLat.setText(mcurrentLatStr);
+        mLong.setText(String.valueOf(mCurrentLoc.getLongitude()));
+        mLat.setText(String.valueOf(mCurrentLoc.getLatitude()));
         // toast if within fence
-        if(mCurrentLoc.toLocation().distanceTo(mLocOfInterest) < 3.0) {
-            withinRangeToastID = R.string.within_range_toast;
-            Toast.makeText(this, withinRangeToastID, Toast.LENGTH_SHORT).show();
-        }
+        if(mCurrentLoc.toLocation().distanceTo(mLocOfInterest) < 3.0)
+            Toast.makeText(this, R.string.within_range_toast, Toast.LENGTH_SHORT).show();
+    }
+    ///////////////
+    //////////////
+    ///////////////
+    //helper method for sending data to firebase
+    private void sendData(SimpleDateFormat time, IALocation location) {
+        //put Time(ie key) into correct format for firebase
+        String formattedTime = time.format(new Date()).replace('.', ':');
+        Firebase mFirebaseChild = mFirebase.child(formattedTime);
+        mFirebaseChild.setValue(formatLocation(location));
     }
 
-    //helper method for sending data to firebase
-    private void sendData() {
-        mTime = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
-        Log.i("info", "mTime declared as..." + mTime );
-        //put Time(ie key) into correct format for firebase
-        String formattedTime = mTime.replace('.', ':');
-        Firebase mFirebaseChild = mFirebase.child(formattedTime);
-        mFirebaseChild.setValue("[" +mcurrentLongStr +" , " +mcurrentLatStr +" , " +mCurrentFloorStr +"]");
-        Log.i("info", "value of child set!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    private String formatLocation(IALocation location) {
+        if(location == null)
+            return "[" + "no location yet" +"]";
+        else {
+            String longStr = String.valueOf(location.getLongitude());
+            String latStr = String.valueOf(location.getLatitude());
+            String floorStr = String.valueOf(location.getFloorLevel());
+            return "[" + longStr + " , " + latStr + " , " + floorStr + "]";
+        }
     }
+    /////////////////
+    //////////////////
+    /////////////
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,21 +94,7 @@ public class MainActivity extends AppCompatActivity {
         //wire up two TextViews for location coods
         mLong = (TextView) findViewById(R.id.long_value);
         mLat = (TextView) findViewById(R.id.lat_value);
-        //wire up our test button for firebase
-        mButton = (Button) findViewById(R.id.send_data);
-        mButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //create a child of mFirebase and add a value to test firebase works
-                //Firebase mFirebaseChild = mFirebase.child("button press");
-                //mFirebaseChild.setValue("send data button");
-                //it works but only first click - use push() and then key will be a uniqueID
-                mFirebase.push().setValue("button pressed");
-                //this works but key name is not in our control
-                //may be better to wire up a timestamp and that can be the key and the value will be the long and lat as an array
-                //for testing, I will retrieve data too
-            }
-        });
+
         Firebase.setAndroidContext(this);
         mFirebase = new Firebase("https://muccoursework-a1c7e.firebaseio.com/");
 
@@ -117,7 +102,6 @@ public class MainActivity extends AppCompatActivity {
         mIALocationManager = IALocationManager.create(this);
 
         //ask for permissions at run time
-        //// TODO: 06/05/2017 check i really need any of the permissions i added later 
         String[] neededPermissions = {
                 Manifest.permission.CHANGE_WIFI_STATE,
                 Manifest.permission.ACCESS_WIFI_STATE,
@@ -138,6 +122,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults){
         int permissionToastID = 0;
+        String permissionRequestToast = "";
+        String finalPermissionToast = "";
         for (int i = 0; i < grantResults.length; i++){
             permissionRequestToast = "Requested: " +permissions[i] + "...";
             if(grantResults[i] == PackageManager.PERMISSION_GRANTED){
@@ -157,24 +143,22 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         //set timer for sending data to firebase - this way it will send to database every second regardless
         //of whether or not the location changes
-        t = new Timer();
-        t.schedule(new TimerTask() {
+        mTimer = new Timer();
+        mTimer.schedule(new TimerTask() {
             @Override
             public void run() {
-                sendData();
-                Log.i("info", "data sent to firebase");
+                sendData(new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss"), mCurrentLoc);
             }
         }, 2000, 1000);
-        //WARNING: I must cancel in onPause
         mIALocationManager.requestLocationUpdates(IALocationRequest.create(), mIALocationListener);
 
     }
 
-    //stop receiving updates when not needed
     protected void onPause() {
         super.onPause();
         //cancel the timer
-        t.cancel();
+        mTimer.cancel();
+        //stop receiving updates when not needed
         mIALocationManager.removeLocationUpdates(mIALocationListener);
         Log.i("info", "timer and loc updates cancelled!!!!!!!!!!!!!!!!");
     }
@@ -196,6 +180,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 }
+
 
 
 

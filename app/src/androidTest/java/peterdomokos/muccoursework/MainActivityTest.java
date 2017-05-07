@@ -22,7 +22,7 @@ public class MainActivityTest {
     @Test
     public void testOnRequestPermissionsResultReturnsGrantedToast(){
         Context appContext = InstrumentationRegistry.getTargetContext();
-        assertEquals("peterdomokos.muccourseworkxxx", appContext.getPackageName());
+        assertEquals("peterdomokos.muccoursework", appContext.getPackageName());
     }
 
 }

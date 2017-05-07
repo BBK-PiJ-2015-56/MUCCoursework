@@ -30,6 +30,6 @@ test:
         - ./gradlew connectedAndroidTest
     post:
         # get artifacts
-        - mkdir -p $CIRCLE_TEST_REPORTS/junit/
-        - cp -r ${HOME}/${CIRCLE_PROJECT_REPONAME}/app/build/outputs/androidTest-results/* $CIRCLE_TEST_REPORTS
-        - cp -r ${HOME}/${CIRCLE_PROJECT_REPONAME}/app/build/outputs/apk/ $CIRCLE_ARTIFACTS
+       # - mkdir -p $CIRCLE_TEST_REPORTS/junit/
+        #- cp -r ${HOME}/${CIRCLE_PROJECT_REPONAME}/app/build/outputs/androidTest-results/* $CIRCLE_TEST_REPORTS
+        #- cp -r ${HOME}/${CIRCLE_PROJECT_REPONAME}/app/build/outputs/apk/ $CIRCLE_ARTIFACTS
