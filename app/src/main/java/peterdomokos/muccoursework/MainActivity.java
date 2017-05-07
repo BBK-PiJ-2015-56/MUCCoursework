@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
     private void sendData() {
         mTime = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
         Log.i("info", "mTime declared as..." + mTime );
-        //put key into correct format for firebase
+        //put Time(ie key) into correct format for firebase
         String formattedTime = mTime.replace('.', ':');
         Firebase mFirebaseChild = mFirebase.child(formattedTime);
         mFirebaseChild.setValue("[" +mcurrentLongStr +" , " +mcurrentLatStr +" , " +mCurrentFloorStr +"]");
@@ -128,8 +128,7 @@ public class MainActivity extends AppCompatActivity {
         //request the permissions
         ActivityCompat.requestPermissions(this, neededPermissions, PERMISSIONS_REQUEST_CODE);
 
-        //set location of interest - wire up to UI later!!!!!!
-        //// TODO: 06/05/2017 wire up loc of interest with UI 
+        // TODO: 06/05/2017 wire up loc of interest with UI
         mLocOfInterest = new Location("aProvider");
         mLocOfInterest.setLongitude(-0.1299845104014142);
         mLocOfInterest.setLatitude(51.52166396722949);
