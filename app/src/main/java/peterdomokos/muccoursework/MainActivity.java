@@ -130,13 +130,6 @@ public class MainActivity extends AppCompatActivity {
                 Manifest.permission.ACCESS_WIFI_STATE,
                 Manifest.permission.ACCESS_COARSE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE ,
-                Manifest.permission.BLUETOOTH,
-                Manifest.permission.BLUETOOTH_ADMIN,
-                Manifest.permission.INTERNET,
-                Manifest.permission.ACCESS_NETWORK_STATE,
-                Manifest.permission.ACCESS_LOCATION_EXTRA_COMMANDS
-                //INSTALL LOCATION PROVIDED NOT INCLUDED - MUST BE SYSTEM APP
         };
 
         //request the permissions
