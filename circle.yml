@@ -24,7 +24,12 @@ test:
         - emulator -avd circleci-android22 -no-audio -no-window:
             background: true
             parallel: true
-        # wait for emulator to have booted
+        # wait for emulator
         - circle-android wait-for-boot
-        # run  instrumentation tests  against the emulator.
+        # run tests
         - ./gradlew connectedAndroidTest
+    post:
+        # get artifacts
+        - mkdir -p $CIRCLE_TEST_REPORTS/junit/
+        - cp -r ${HOME}/${CIRCLE_PROJECT_REPONAME}/app/build/outputs/androidTest-results/* $CIRCLE_TEST_REPORTS
+        - cp -r ${HOME}/${CIRCLE_PROJECT_REPONAME}/app/build/outputs/apk/ $CIRCLE_ARTIFACTS
