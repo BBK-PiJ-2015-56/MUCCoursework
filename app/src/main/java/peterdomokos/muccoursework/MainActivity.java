@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import com.firebase.client.Firebase;
@@ -36,11 +37,15 @@ public class MainActivity extends AppCompatActivity {
     IALocation mCurrentLoc;
     String mcurrentLongStr ="no value yet";
     String mcurrentLatStr = "no value yet";
+    String mCurrentFloorStr = "no value yet";
     TextView mLong;
     TextView mLat;
     String mTime;
     Timer t;
     Location mLocOfInterest;
+    int withinRangeToastID = 0;
+    String permissionRequestToast = "";
+    String finalPermissionToast = "";
 
     // give runtime code permissions an arbitrary value
     private final int PERMISSIONS_REQUEST_CODE = 1;
@@ -55,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
             mCurrentLoc = iaLocation;
             mcurrentLongStr = String.valueOf(mCurrentLoc.getLongitude());
             mcurrentLatStr = String.valueOf(mCurrentLoc.getLatitude());
+            mCurrentFloorStr = String.valueOf(mCurrentLoc.getFloorLevel());
 
             Log.i("info", "CURRENT LOCATION CHANGED TO " + mCurrentLoc.toString());
             updateDisplay();
@@ -71,20 +77,21 @@ public class MainActivity extends AppCompatActivity {
         mLong.setText(mcurrentLongStr);
         mLat.setText(mcurrentLatStr);
         // toast if within fence
-        if(mCurrentLoc.toLocation().distanceTo(mLocOfInterest) < 3.0)
+        if(mCurrentLoc.toLocation().distanceTo(mLocOfInterest) < 3.0) {
             Log.i("info", "WITHIN RANGE!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-        //// TODO: 06/05/2017 toast to user that they are within range 
+            withinRangeToastID = R.string.within_range_toast;
+            Toast.makeText(this, withinRangeToastID, Toast.LENGTH_SHORT).show();
+        }
     }
 
     //helper method for sending data to firebase
     private void sendData() {
-        //// TODO: 06/05/2017 check what i need to send - ie floor level?? 
         mTime = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
         Log.i("info", "mTime declared as..." + mTime );
         //put key into correct format for firebase
         String formattedTime = mTime.replace('.', ':');
         Firebase mFirebaseChild = mFirebase.child(formattedTime);
-        mFirebaseChild.setValue("[" +mcurrentLongStr +" , " +mcurrentLatStr +"]");
+        mFirebaseChild.setValue("[" +mcurrentLongStr +" , " +mcurrentLatStr +" , " +mCurrentFloorStr +"]");
         Log.i("info", "value of child set!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     }
 
@@ -136,6 +143,7 @@ public class MainActivity extends AppCompatActivity {
         ActivityCompat.requestPermissions(this, neededPermissions, PERMISSIONS_REQUEST_CODE);
 
         //set location of interest - wire up to UI later!!!!!!
+        //// TODO: 06/05/2017 wire up loc of interest with UI 
         mLocOfInterest = new Location("aProvider");
         mLocOfInterest.setLongitude(-0.1299845104014142);
         mLocOfInterest.setLatitude(51.52166396722949);
@@ -144,13 +152,18 @@ public class MainActivity extends AppCompatActivity {
     //deal with permissions result
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults){
+        int permissionToastID = 0;
         for (int i = 0; i < grantResults.length; i++){
+            permissionRequestToast = "Requested: " +permissions[i] + "...";
             if(grantResults[i] == PackageManager.PERMISSION_GRANTED){
                 Log.i("info", "permission granted for: " + permissions[i]);
+                permissionToastID = R.string.permission_granted_toast;
             }else{
                 Log.i("info", "permission denied for: " + permissions[i]);
+                permissionToastID = R.string.permission_denied_toast;
             }
-
+            finalPermissionToast = permissionRequestToast + getString(permissionToastID);
+            Toast.makeText(this, finalPermissionToast , Toast.LENGTH_SHORT).show();
         }
     }
 

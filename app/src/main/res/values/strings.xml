@@ -3,4 +3,7 @@
     <string name="action_settings">Settings</string>
     <string name="within_fence">You are within range</string>
     <string name="outside_fence">You are outside range</string>
+    <string name="permission_granted_toast">RESULT: permission granted</string>
+    <string name="permission_denied_toast">RESULT: permission denied</string>
+    <string name="within_range_toast">You are now within 3 metres of your location of interest</string>
 </resources>
