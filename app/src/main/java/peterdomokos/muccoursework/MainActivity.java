@@ -3,7 +3,6 @@ package peterdomokos.muccoursework;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -20,13 +19,9 @@ import com.indooratlas.android.sdk.IALocationListener;
 import com.indooratlas.android.sdk.IALocationManager;
 import com.indooratlas.android.sdk.IALocationRequest;
 
-import org.w3c.dom.Text;
 
-import java.security.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -40,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
     String mCurrentFloorStr = "no value yet";
     TextView mLong;
     TextView mLat;
-    String mTime;
+    String mTime ="";
     Timer t;
     Location mLocOfInterest;
     int withinRangeToastID = 0;
@@ -56,7 +51,6 @@ public class MainActivity extends AppCompatActivity {
     IALocationListener mIALocationListener = new IALocationListener() {
         @Override
         public void onLocationChanged(IALocation iaLocation) {
-            Log.i("info", "LOCATION HAS CHANGED!!!!!!!!!!!!!!!!!!!!!!!!!");
             mCurrentLoc = iaLocation;
             mcurrentLongStr = String.valueOf(mCurrentLoc.getLongitude());
             mcurrentLatStr = String.valueOf(mCurrentLoc.getLatitude());
@@ -78,7 +72,6 @@ public class MainActivity extends AppCompatActivity {
         mLat.setText(mcurrentLatStr);
         // toast if within fence
         if(mCurrentLoc.toLocation().distanceTo(mLocOfInterest) < 3.0) {
-            Log.i("info", "WITHIN RANGE!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
             withinRangeToastID = R.string.within_range_toast;
             Toast.makeText(this, withinRangeToastID, Toast.LENGTH_SHORT).show();
         }
@@ -169,11 +162,10 @@ public class MainActivity extends AppCompatActivity {
         t.schedule(new TimerTask() {
             @Override
             public void run() {
-                Log.i("info", "Timer task running!!!!!!.calling sendData method ");
                 sendData();
                 Log.i("info", "data sent to firebase");
             }
-        }, 5000, 1000);
+        }, 2000, 1000);
         //WARNING: I must cancel in onPause
         mIALocationManager.requestLocationUpdates(IALocationRequest.create(), mIALocationListener);
 
@@ -181,13 +173,11 @@ public class MainActivity extends AppCompatActivity {
 
     //stop receiving updates when not needed
     protected void onPause() {
-        Log.i("info", "onPause called");
         super.onPause();
         //cancel the timer
         t.cancel();
-        Log.i("info", "timer cancelled !!!!!!!!!!!!!!!!!!!!!");
         mIALocationManager.removeLocationUpdates(mIALocationListener);
-        Log.i("info", "remove loc updates executed!!!!!!!!!!!!!!!!!");
+        Log.i("info", "timer and loc updates cancelled!!!!!!!!!!!!!!!!");
     }
 
     protected void onDestroy() {

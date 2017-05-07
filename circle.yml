@@ -20,3 +20,11 @@ test:
     override:
         - (./gradlew assemble):
             timeout: 360
+        # Run emulator
+        - emulator -avd circleci-android22 -no-audio -no-window:
+            background: true
+            parallel: true
+        # wait for emulator to have booted
+        - circle-android wait-for-boot
+        # run  instrumentation tests  against the emulator.
+        - ./gradlew connectedAndroidTest
