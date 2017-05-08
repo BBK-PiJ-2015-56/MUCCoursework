@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
         mLong.setText(String.valueOf(mCurrentLoc.getLongitude()));
         mLat.setText(String.valueOf(mCurrentLoc.getLatitude()));
         // toast if within fence
-        if(IADistanceComparator.isWithinRangeOfTarget(mCurrentLoc, mLocOfInterest, GEOFENCE_RANGE))
+        if(IADistanceComparator.isWithinRange(mCurrentLoc, mLocOfInterest, GEOFENCE_RANGE))
             Toast.makeText(this, R.string.within_range_toast, Toast.LENGTH_SHORT).show();
     }
 

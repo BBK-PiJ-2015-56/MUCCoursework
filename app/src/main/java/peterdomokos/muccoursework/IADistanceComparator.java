@@ -12,7 +12,11 @@ import com.indooratlas.android.sdk.IALocation;
  * with any combination of location objects of the IALocation and android.location types.
  */
 public class IADistanceComparator {
-    public static boolean isWithinRangeOfTarget(IALocation locationToCheck, Location target, int range){
+    public static boolean isWithinRange(IALocation locationToCheck, Location target, int range){
         return locationToCheck.toLocation().distanceTo(target) < range;
     }
+
+    //note: I could also implement teh otehr overloads of this method that deal with other
+    //combinations of locations as parameters, incase someone wanted to set teh location of interest
+    //using indooratlas so it would be an IALocation. However, this is not required for coursework.
 }
