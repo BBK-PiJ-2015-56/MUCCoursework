@@ -38,6 +38,8 @@ public class MainActivity extends AppCompatActivity {
 
     // give runtime code permissions an arbitrary value
     private final int PERMISSIONS_REQUEST_CODE = 1;
+    //geo fence range
+    private final int GEOFENCE_RANGE = 3;
     //declare the manager
     IALocationManager mIALocationManager;
 
@@ -60,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
         mLong.setText(String.valueOf(mCurrentLoc.getLongitude()));
         mLat.setText(String.valueOf(mCurrentLoc.getLatitude()));
         // toast if within fence
-        if(mCurrentLoc.toLocation().distanceTo(mLocOfInterest) < 3.0)
+        if(IADistanceComparator.isWithinRangeOfTarget(mCurrentLoc, mLocOfInterest, GEOFENCE_RANGE))
             Toast.makeText(this, R.string.within_range_toast, Toast.LENGTH_SHORT).show();
     }
 
@@ -89,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
         //request the permissions
         ActivityCompat.requestPermissions(this, neededPermissions, PERMISSIONS_REQUEST_CODE);
 
-        // TODO: 06/05/2017 wire up loc of interest with UI
+        //initialize the location of interest
         mLocOfInterest = new Location("aProvider");
         mLocOfInterest.setLongitude(-0.1299845104014142);
         mLocOfInterest.setLatitude(51.52166396722949);
