@@ -24,7 +24,7 @@ public class FirebaseCommunicator {
         firebaseChild.setValue(formatLocationForFirebase(location));
     }
 
-    private String formatLocationForFirebase(IALocation location) {
+    public String formatLocationForFirebase(IALocation location) {
          if(location == null)
              return "[" + "no location yet" +"]";
          else {

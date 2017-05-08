@@ -28,6 +28,7 @@ public class MainActivityTest {
     @Test
     public void testOnRequestPermissionsResultReturnsGrantedToast(){
         MainActivity activity = rule.getActivity();
+
         assertEquals(1,1);
 
     }
