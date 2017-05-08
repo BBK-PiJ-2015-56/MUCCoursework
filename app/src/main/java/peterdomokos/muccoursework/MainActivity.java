@@ -28,6 +28,7 @@ import java.util.TimerTask;
 public class MainActivity extends AppCompatActivity {
 
     private Firebase mFirebase;
+    private FirebaseCommunicator mFirebaseCommunicator;
     private IALocation mCurrentLoc;
 
     private TextView mLong;
@@ -62,30 +63,6 @@ public class MainActivity extends AppCompatActivity {
         if(mCurrentLoc.toLocation().distanceTo(mLocOfInterest) < 3.0)
             Toast.makeText(this, R.string.within_range_toast, Toast.LENGTH_SHORT).show();
     }
-    ///////////////
-    //////////////
-    ///////////////
-    //helper method for sending data to firebase
-    private void sendData(SimpleDateFormat time, IALocation location) {
-        //put Time(ie key) into correct format for firebase
-        String formattedTime = time.format(new Date()).replace('.', ':');
-        Firebase mFirebaseChild = mFirebase.child(formattedTime);
-        mFirebaseChild.setValue(formatLocation(location));
-    }
-
-    private String formatLocation(IALocation location) {
-        if(location == null)
-            return "[" + "no location yet" +"]";
-        else {
-            String longStr = String.valueOf(location.getLongitude());
-            String latStr = String.valueOf(location.getLatitude());
-            String floorStr = String.valueOf(location.getFloorLevel());
-            return "[" + longStr + " , " + latStr + " , " + floorStr + "]";
-        }
-    }
-    /////////////////
-    //////////////////
-    /////////////
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
 
         Firebase.setAndroidContext(this);
         mFirebase = new Firebase("https://muccoursework-a1c7e.firebaseio.com/");
-
+        mFirebaseCommunicator = new FirebaseCommunicator(mFirebase);
         //instantiate location manager, passing in current context
         mIALocationManager = IALocationManager.create(this);
 
@@ -121,9 +98,9 @@ public class MainActivity extends AppCompatActivity {
     //deal with permissions result
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults){
-        int permissionToastID = 0;
-        String permissionRequestToast = "";
-        String finalPermissionToast = "";
+        int permissionToastID;
+        String permissionRequestToast;
+        String finalPermissionToast;
         for (int i = 0; i < grantResults.length; i++){
             permissionRequestToast = "Requested: " +permissions[i] + "...";
             if(grantResults[i] == PackageManager.PERMISSION_GRANTED){
@@ -147,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
         mTimer.schedule(new TimerTask() {
             @Override
             public void run() {
-                sendData(new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss"), mCurrentLoc);
+                mFirebaseCommunicator.sendData(new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss"), mCurrentLoc);
             }
         }, 2000, 1000);
         mIALocationManager.requestLocationUpdates(IALocationRequest.create(), mIALocationListener);
@@ -160,7 +137,6 @@ public class MainActivity extends AppCompatActivity {
         mTimer.cancel();
         //stop receiving updates when not needed
         mIALocationManager.removeLocationUpdates(mIALocationListener);
-        Log.i("info", "timer and loc updates cancelled!!!!!!!!!!!!!!!!");
     }
 
     protected void onDestroy() {
