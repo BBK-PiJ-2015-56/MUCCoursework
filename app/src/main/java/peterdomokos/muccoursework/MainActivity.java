@@ -7,8 +7,6 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,10 +19,14 @@ import com.indooratlas.android.sdk.IALocationRequest;
 
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
+/**
+ * An activity which sets up a channel to start receiving IALocation updates. It displays the current location
+ * on the display, sends location updates to a database every second, and sends a toast whenever the location is within
+ * a given range of a specific location.
+ */
 public class MainActivity extends AppCompatActivity {
 
     private Firebase mFirebase;
@@ -53,11 +55,15 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onStatusChanged(String str, int i, Bundle bundle) {
-            //...
+            //not required
         }
     };
 
-    //refactor later to pass in location
+    /**
+     * A method which updates the longtitude and latitude displayed on screen with the current position,
+     * and displays a toast if that position is within the range of the location of interest.
+     *
+     */
     private void updateDisplay() {
         mLong.setText(String.valueOf(mCurrentLoc.getLongitude()));
         mLat.setText(String.valueOf(mCurrentLoc.getLatitude()));
@@ -117,7 +123,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    //pass location updates to the manager by sending a request to listener
+    /**
+     * Sets a timertask which will send location data to a database every second.
+     * It also starts the location updates requests, and calls its super.
+     */
     protected void onResume() {
         super.onResume();
         //set timer for sending data to firebase - this way it will send to database every second regardless
@@ -133,6 +142,10 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * cancels the timertask which is sending teh location updates to teh database,
+     * and also removes the location updates that are being received through location listener.
+     */
     protected void onPause() {
         super.onPause();
         //cancel the timer
